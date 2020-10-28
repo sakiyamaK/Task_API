@@ -1,7 +1,7 @@
 import Foundation
 
 /*
- 課題4
+ 課題3
  APIレスポンスのエラーハンドリング
  */
 
