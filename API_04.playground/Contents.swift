@@ -7,22 +7,34 @@ import Foundation
  */
 
 struct GithubRepository: Codable {
-  /*ここに書き足す*/
+  struct Item: Codable {
+    let fullName: String?
+    let htmlUrl: String?
+    enum CodingKeys: String, CodingKey {
+      case fullName = "full_name", htmlUrl = "html_url"
+    }
 
+  }
+  let items: [Item]?
 }
 
-enum GithubError: Int {
-  case searchWordRequest = 999, searchWordResponse
+enum GithubError: Error {
+  case requestFailed
+  case responseFailed(Error?)
+  case decodeFailed(Error)
+  case unknown
 
-  var code: Int { self.rawValue }
-  var domain: String {
-    /*ここに書き足す*/
-    //正しくエラーのドメインを用意する
-    ""
-  }
-
-  var error: NSError {
-    NSError.init(domain: self.domain, code: self.code, userInfo: nil)
+  var title: String {
+    switch self {
+    case .requestFailed:
+      return "ApiError : Unavailable status code"
+    case .responseFailed(let raw):
+      return "ApiError : Failed to response \(raw?.localizedDescription ?? " error")"
+    case .decodeFailed(let raw):
+      return "ApiError : Failed to decode \(raw.localizedDescription)"
+    case .unknown:
+      return "ApiError : Unknown error"
+    }
   }
 }
 
@@ -32,29 +44,48 @@ final class GithubAPI {
 
   private let host = "https://api.github.com"
 
-  func requestRepository(searchWork: String, completion: ((GithubRepository?, Error?) -> Void)? = nil) {
+  func requestRepositories(searchWork: String, completion: ((GithubRepository?, GithubError?) -> Void)? = nil) {
     let endpoint = "search/repositories"
     let parameter = "q=\(searchWork)"
     guard let url = URL(string: host + "/" + endpoint + "?" +  parameter) else {
-      completion?(nil, GithubError.searchWordRequest.error)
+      completion?(nil, GithubError.requestFailed)
       return
     }
     //urlにアクセス
     URLSession.shared.dataTask(with: url) { data, response, error in
       if let _error = error {
-        completion?(nil, _error)
+        completion?(nil, GithubError.responseFailed(_error))
         return
       }
-      guard let _data = data, let responseJsonStr = String(data: _data, encoding: .utf8) else {
-        completion?(nil, GithubError.searchWordResponse.error)
+      guard let _data = data else {
+        completion?(nil, GithubError.responseFailed(nil))
         return
       }
-      print(responseJsonStr)
       /*ここに書き足す*/
       //受け取ったレスポンスからGithubRepositoryモデルを生成してください
-      completion?(nil, nil)
+      do {
+        let githubRepository = try JSONDecoder().decode(GithubRepository.self, from: _data)
+        completion?(githubRepository, nil)
+      } catch(let e) {
+        completion?(nil, GithubError.decodeFailed(e))
+      }
     }.resume()
   }
 }
 
-GithubAPI.shared.requestRepository(searchWork: "iOS")
+GithubAPI.shared.requestRepositories(searchWork: "iOS") { (repository, error) in
+  if let _error = error {
+    print(_error.title)
+    return
+  }
+  guard let _repositoryItems = repository?.items else {
+    print(GithubError.unknown.title)
+    return
+  }
+
+  for item in _repositoryItems {
+    print(item.fullName ?? "")
+    print(item.htmlUrl ?? "")
+    print("-----------")
+  }
+}

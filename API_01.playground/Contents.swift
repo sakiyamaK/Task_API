@@ -50,14 +50,18 @@ API.shared.requestUser { (name, address, age) in
 
 /*--------------- ここから修正 -------------*/
 //このUserModelをCodableを使って完成さえる
-struct UserModel {
+struct UserModel: Codable {
+  let name: String
+  let address: String
+  let age: Int
 }
 
 extension API {
-  func requestUser2(completion:((UserModel) -> ())?=nil) {
-    //jsonからCodableを使ってモデル化する
-    //エラーハンドも正しくやる
-    let userModel = UserModel()
+  func requestUser2(completion:((UserModel?) -> ())?=nil) {
+    guard let userModel = try? JSONDecoder().decode(UserModel.self, from: json) else {
+      completion?(nil)
+      return
+    }
     completion?(userModel)
   }
 }
@@ -65,6 +69,11 @@ extension API {
 //UserModelを受け取るrequestTest2
 //出力はrequestTestと同じにしてください
 API.shared.requestUser2 { (userModel) in
-  /*ここに書き足す*/
+  guard let _userModel = userModel else {
+    return
+  }
+  print(_userModel.name)
+  print(_userModel.address)
+  print(_userModel.age)
 }
 
