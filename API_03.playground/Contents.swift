@@ -29,7 +29,7 @@ let json = Bool.random() ? """
 }
 ]
 """.data(using: .utf8)!
-:
+  :
   """
 {"error": {
 "title": "不正な入力です",
@@ -37,6 +37,7 @@ let json = Bool.random() ? """
 }
 }
 """.data(using: .utf8)!
+
 
 /*ここに書き足す*/
 struct UserModel {

@@ -56,7 +56,6 @@ struct UserModel {
 extension API {
   func requestUser2(completion:((UserModel) -> ())?=nil) {
     //jsonからCodableを使ってモデル化する
-    //エラーハンドも正しくやる
     let userModel = UserModel()
     completion?(userModel)
   }

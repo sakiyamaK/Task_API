@@ -58,19 +58,17 @@ API.shared.requestUser1 {
 
 //サーバーから返ってくるjsonのdata
 let json2 = """
-[
 {
 "name": "sasaki",
 "address": "東京",
-"age": 20
+"age": 20,
 "friend": {
   "name": "tanaka",
   "address": "大阪",
   "age": 10
 }
-]
+}
 """.data(using: .utf8)!
-
 
 /*ここに書き足す*/
 struct UserModel2 {
@@ -98,11 +96,10 @@ API.shared.requestUser2 {
 
 //サーバーから返ってくるjsonのdata
 let json3 = """
-[
 {
 "name": "sasaki",
 "address": "東京",
-"age": 20
+"age": 20,
 "friends": [
   {
     "name": "tanaka",
@@ -115,6 +112,7 @@ let json3 = """
     "age": 30
   }
 ]
+}
 """.data(using: .utf8)!
 
 
@@ -152,8 +150,8 @@ let json4 = """
 },
 {
 "name": "tanaka",
-"address": "大阪",
-}
+"address": "大阪"
+},
 {
 "name": "saito",
 "age": 40
